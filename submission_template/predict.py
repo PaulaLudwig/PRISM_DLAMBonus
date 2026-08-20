@@ -11,7 +11,7 @@ from pathlib import Path
 import pandas as pd
 import torch
 
-from src.model import ForecastModel
+from PRISM_DLAMBonus.src.model import ForecastModel
 
 
 def load_forecast_index(input_dir: Path) -> pd.DataFrame:

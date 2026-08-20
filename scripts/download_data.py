@@ -1,7 +1,3 @@
-
-"""
-downloads the data files from the Hugging Face Hub and saves them to the local data directory.
-"""
 from pathlib import Path
  
 from huggingface_hub import hf_hub_download
@@ -19,7 +15,7 @@ FILES = [
 DATA_DIR = Path(__file__).parent.parent / "data"
  
  
-def main() -> None:
+def main():
     DATA_DIR.mkdir(exist_ok=True)
     for filename in FILES:
         print(f"Downloading {filename} ...")
