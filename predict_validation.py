@@ -33,6 +33,8 @@ def build_from_checkpoint(saved, n_series):
             hidden_size=saved.get("hidden_size", 128),
             num_layers=saved.get("num_layers", 2),
             dropout=saved.get("dropout", 0.2),
+            embedding_dim=16,
+            static_dim = 32
         )
     return PRISMForecaster(
         n_static=N_STATIC_FEATURES,
@@ -43,6 +45,7 @@ def build_from_checkpoint(saved, n_series):
         patch_len=saved.get("patch_len", 24),
         dropout=saved.get("dropout", 0.2),
         mode=saved.get("mode", "full"),
+        pooling=saved.get("pooling", "mean"),
     )
 
 
