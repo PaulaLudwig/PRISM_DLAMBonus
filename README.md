@@ -402,47 +402,6 @@ This indicates that the preferred bridge is **dataset-dependent**. On the course
 
 ---
 
-## Training on All Labelled Course Data
-
-After selecting an architecture using the local holdout, `--full` trains on all labelled course-dataset hours.
-
-For the patch-preserving PRISM model:
-
-```bash
-python train.py \
-  --model prism \
-  --mode full \
-  --pooling patches \
-  --epochs 30 \
-  --stride 6 \
-  --batch-size 128 \
-  --full
-```
-
-This produces a full-data checkpoint and scaler with filenames containing `_full`.
-
----
-
-## Generating Validation Predictions
-
-Example:
-
-```bash
-python predict_validation.py \
-  --checkpoint checkpoints/prism_full_patches_full.pt \
-  --scaler checkpoints/scaler_full.npz \
-  --output-file predictions/prism_full_patches.csv \
-  --device mps
-```
-
-The expected output format is:
-
-```csv
-series_id,timestamp,prediction
-```
-
----
-
 ## Reproducibility Notes
 
 - Python, NumPy, and PyTorch seeds are set through `--seed` (default: `42`).
