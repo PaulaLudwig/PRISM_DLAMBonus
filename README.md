@@ -62,15 +62,6 @@ Install the project dependencies:
 pip install -r requirements.txt
 ```
 
-The minimal requirements are:
-
-```text
-numpy
-pandas
-torch
-huggingface_hub
-```
-
 The training code can run on CPU, CUDA, or Apple Silicon via MPS. To explicitly select Apple MPS, for example:
 
 ```bash
