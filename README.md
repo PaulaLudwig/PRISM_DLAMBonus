@@ -109,7 +109,7 @@ data/etth1/raw/ETTh1.csv
 Prepare the dataset once with:
 
 ```bash
-python scripts/prepare_etth1.py
+python scripts/prep_dataset2.py
 ```
 
 This creates:
@@ -257,7 +257,7 @@ python train.py \
 First prepare ETTh1:
 
 ```bash
-python scripts/prepare_etth1.py
+python scripts/prep_dataset2.py
 ```
 
 Use `data/etth1/prepared` as the data directory. Separate checkpoint directories are used below to avoid overwriting models from other experiments.
