@@ -28,7 +28,7 @@ PRISM_DLAMBonus/
 │           └── validation_input.csv
 ├── scripts/
 │   ├── download_data.py
-│   └── prepare_etth1.py
+│   └── pre_dataset2.py
 ├── src/
 │   ├── data.py
 │   ├── metrics.py
