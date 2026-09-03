@@ -1,12 +1,21 @@
 from __future__ import annotations
 
+import pathlib
+import pathlib._local
+try:
+    pathlib.PosixPath = pathlib.WindowsPath
+    pathlib._local.PosixPath = pathlib.WindowsPath
+except Exception:
+    pass
+
+
 import argparse
 from pathlib import Path
 
 import numpy as np
 import torch
 
-from PRISM_DLAMBonus.predict_validation import build_from_checkpoint
+from predict_validation import build_from_checkpoint
 from src.data import Scaler, build_inference_batch, load_panel, target_floor
 from src.metrics import all_metrics, format_metrics
 from src.model import denormalize

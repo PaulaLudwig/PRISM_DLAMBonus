@@ -38,6 +38,8 @@ def build_model(args, n_series: int):
             hidden_size=args.hidden_size,
             num_layers=args.num_layers,
             dropout=args.dropout,
+            embedding_dim=16,
+            static_dim = 32
         )
     return PRISMForecaster(
         n_static=N_STATIC_FEATURES,
@@ -48,12 +50,19 @@ def build_model(args, n_series: int):
         patch_len=args.patch_len,
         dropout=args.dropout,
         mode=args.mode,
+        pooling=args.pooling,
     )
 
 
 def run_tag(args):
-    
-    base = args.model if args.model == "lstm" else f"prism_{args.mode}"
+    if args.model == "lstm":
+        base = "lstm"
+    else:
+        base = f"prism_{args.mode}"
+
+        if args.mode != "stage2" and args.pooling != "mean":
+            base += f"_{args.pooling}"
+
     return f"{base}_full" if args.full else base
 
 
@@ -74,7 +83,7 @@ def select_device(requested):
     return torch.device("cpu")
 
 
-def move(batch):
+def move(batch,device):
     return {
         key: value.to(device, non_blocking=True) for key, value in batch.items()
         }
@@ -128,6 +137,12 @@ def main():
     parser.add_argument("--num-workers", type=int, default=0)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", type=str, default="auto")
+    parser.add_argument(
+        "--pooling",
+        choices=["mean", "attention", "patches"],
+        default="mean",
+        help="pooling between PRISM stage 1 and stage 2",
+    )
     args = parser.parse_args()
 
     set_seed(args.seed)
