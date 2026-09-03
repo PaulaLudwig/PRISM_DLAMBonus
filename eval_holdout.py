@@ -1,5 +1,14 @@
 from __future__ import annotations
 
+import pathlib
+import pathlib._local
+try:
+    pathlib.PosixPath = pathlib.WindowsPath
+    pathlib._local.PosixPath = pathlib.WindowsPath
+except Exception:
+    pass
+
+
 import argparse
 from pathlib import Path
 
