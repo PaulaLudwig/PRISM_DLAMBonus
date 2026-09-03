@@ -72,7 +72,7 @@ class PatchTCNEncoder(nn.Module):
         if pooling == "attention":
             self.pool_score = nn.Linear(d_model, 1, bias=False)
 
-            # Start with uniform attention, i.e. exactly like mean pooling.
+            #start with uniform attention i.e. exactly like mean pooling.
             nn.init.zeros_(self.pool_score.weight)
 
     def forward(self, series):
@@ -88,15 +88,11 @@ class PatchTCNEncoder(nn.Module):
 
         tokens = self.patch_embed(patches)
 
-        # (N, patches, d_model)
-        # -> (N, d_model, patches)
         encoded = self.tcn(tokens.transpose(1, 2))
 
         if self.pooling == "mean":
             return encoded.mean(dim=2)
 
-        # Attention and patch-preserving modes use:
-        # (N, n_patches, d_model)
         encoded = encoded.transpose(1, 2)
 
         if self.pooling == "attention":
@@ -108,8 +104,6 @@ class PatchTCNEncoder(nn.Module):
                 dim=1,
             )
 
-        # pooling == "patches"
-        # Do not collapse the temporal patch dimension.
         return encoded
 
 
@@ -152,7 +146,7 @@ class PRISMForecaster(nn.Module):
         self.horizon = horizon
         self.d_model = d_model
         self.patch_len = patch_len
-        self.n_tokens = 1 + N_COVARIATES + 1  # target + covariates + static
+        self.n_tokens = 1 + N_COVARIATES + 1  #target + covariates + static
 
         self.series_embedding = nn.Embedding(n_series, embedding_dim)
         self.static_encoder = nn.Sequential(
@@ -176,29 +170,15 @@ class PRISMForecaster(nn.Module):
             self.max_patches = (history + horizon) // patch_len
 
             # 0 = target, 1...18 = covariates
-            self.variable_embedding = nn.Embedding(
-                1 + N_COVARIATES,
-                d_model,
-            )
+            self.variable_embedding = nn.Embedding(1 + N_COVARIATES,d_model)
 
-            # Tells the Transformer whether a token came from
-            # temporal patch 0, 1, ..., 20.
-            self.patch_position_embedding = nn.Embedding(
-                self.max_patches,
-                d_model,
-            )
+            self.patch_position_embedding = nn.Embedding(self.max_patches,d_model)
 
-            # A dedicated token that will collect information
-            # from all target/covariate patches for forecasting.
-            self.forecast_token = nn.Parameter(
-                torch.zeros(1, 1, d_model)
-            )
+            #learned forecast query token
+            self.forecast_token = nn.Parameter(torch.zeros(1, 1, d_model))
 
-            nn.init.normal_(
-                self.forecast_token,
-                mean=0.0,
-                std=0.02,
-            )
+            nn.init.normal_(self.forecast_token,mean=0.0,std=0.02)
+
         if mode == "stage1":
             self.channel_mixer = nn.Sequential(
                 nn.Linear(self.n_tokens * d_model, d_model),
@@ -257,8 +237,8 @@ class PRISMForecaster(nn.Module):
             torch.cat([static, self.series_embedding(series_index)], dim=-1)
         )
         if self.mode == "stage2":
-            # Stage-2-only baseline:
-            # embed the complete trajectory directly into one token.
+            #stage-2-only baseline:
+            #embed the complete trajectory directly into one token.
             target_token = self.target_embed(
                 target_series.reshape(batch, -1)
             )
@@ -270,70 +250,29 @@ class PRISMForecaster(nn.Module):
                     -1,
                 )
             )
-
+        # patch preserving bridge
         elif self.pooling == "patches":
-            # =========================================================
-            # PATCH-PRESERVING BRIDGE
-            # =========================================================
 
-            # Target history:
-            # (B, 168, 2)
-            # -> encoder
-            # -> (B, 7, d_model)
+            #encode target patches
             target_patches = self.encoder(target_series)
 
-            # Covariates:
-            # start as (B, 18, 504, 2)
-            #
-            # Merge B and variable dimensions because the same
-            # channel-independent TCN processes every covariate:
-            #
-            # (B*18, 504, 2)
-            # -> encoder
-            # -> (B*18, 21, d_model)
-            covariate_patches = self.encoder(
-                covariate_series.reshape(
-                    batch * N_COVARIATES,
-                    length,
-                    2,
-                )
-            )
+            #encode covariate patches
+            covariate_patches = self.encoder(covariate_series.reshape(batch * N_COVARIATES,length,2))
 
             n_cov_patches = covariate_patches.shape[1]
 
-            # Restore the variable dimension:
-            #
-            # (B*18, 21, d_model)
-            # ->
-            # (B, 18, 21, d_model)
-            covariate_patches = covariate_patches.reshape(
-                batch,
-                N_COVARIATES,
-                n_cov_patches,
-                self.d_model,
-            )
+            covariate_patches = covariate_patches.reshape(batch,N_COVARIATES,n_cov_patches,self.d_model)
 
-            # =========================================================
-            # ADD IDENTITY TO TARGET PATCHES
-            # =========================================================
+            #add variable and patch-position embeddings to covariate patches
 
             n_target_patches = target_patches.shape[1]
 
-            # Variable ID 0 is the target.
-            target_var_ids = torch.zeros(
-                n_target_patches,
-                dtype=torch.long,
-                device=target_patches.device,
-            )
+            #target has variable id 0
+            target_var_ids = torch.zeros(n_target_patches,dtype=torch.long,device=target_patches.device)
 
-            # Temporal positions 0...6.
-            target_pos_ids = torch.arange(
-                n_target_patches,
-                device=target_patches.device,
-            )
+            target_pos_ids = torch.arange(n_target_patches,device=target_patches.device)
 
-            target_patches = (
-                target_patches
+            target_patches = (target_patches
                 + self.variable_embedding(
                     target_var_ids
                 ).unsqueeze(0)
@@ -342,22 +281,10 @@ class PRISMForecaster(nn.Module):
                 ).unsqueeze(0)
             )
 
-            # =========================================================
-            # ADD IDENTITY TO COVARIATE PATCHES
-            # =========================================================
+            #covariates have IDs 1...18
+            covariate_var_ids = torch.arange(1,N_COVARIATES + 1,device=covariate_patches.device)
 
-            # IDs 1...18 identify the covariates.
-            covariate_var_ids = torch.arange(
-                1,
-                N_COVARIATES + 1,
-                device=covariate_patches.device,
-            )
-
-            # Temporal positions 0...20.
-            covariate_pos_ids = torch.arange(
-                n_cov_patches,
-                device=covariate_patches.device,
-            )
+            covariate_pos_ids = torch.arange(n_cov_patches,device=covariate_patches.device)
 
             covariate_patches = (
                 covariate_patches
@@ -369,26 +296,12 @@ class PRISMForecaster(nn.Module):
                 )[None, None, :, :]
             )
 
-            # Flatten variable × patch into one Transformer token axis:
-            #
-            # (B, 18, 21, d_model)
-            # ->
-            # (B, 378, d_model)
-            covariate_patches = covariate_patches.reshape(
-                batch,
-                N_COVARIATES * n_cov_patches,
-                self.d_model,
-            )
+            #flatten covariate patches into the Transformer token axis
+            covariate_patches = covariate_patches.reshape(batch,N_COVARIATES * n_cov_patches,self.d_model)
 
-            # =========================================================
-            # BUILD STAGE-2 TOKEN SEQUENCE
-            # =========================================================
+            #build Stage 2 token sequence
 
-            forecast_token = self.forecast_token.expand(
-                batch,
-                -1,
-                -1,
-            )
+            forecast_token = self.forecast_token.expand(batch,-1,-1)
 
             tokens = torch.cat(
                 [
@@ -400,17 +313,13 @@ class PRISMForecaster(nn.Module):
                 dim=1,
             )
 
-            # Total:
-            # 1 + 7 + 378 + 1 = 387 tokens
+            #total = 1 + 7 + 378 + 1 = 387 tokens
             enriched = self.cross_variate(tokens)
 
-            # Forecast token is at index 0.
             return self.head(enriched[:, 0])
 
         else:
-            # =========================================================
-            # EXISTING MEAN / ATTENTION POOLING PATH
-            # =========================================================
+            #mean / attention pooling
 
             target_token = self.encoder(
                 target_series
@@ -428,11 +337,7 @@ class PRISMForecaster(nn.Module):
                 self.d_model,
             )
 
-        # =============================================================
-        # EXISTING SINGLE-TOKEN PATH
-        # Used by stage2, mean pooling and attention pooling.
-        # The patches branch above has already returned.
-        # =============================================================
+        #single-token path for stage2, mean, and attention pooling
 
         tokens = torch.cat(
             [
