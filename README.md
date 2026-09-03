@@ -366,7 +366,7 @@ Lower values are better for all metrics. **WAPE is the primary model-selection m
 |---|---:|
 | Full PRISM – mean pooling | 0.2429 |
 | Full PRISM – attention pooling | 0.2436 |
-| Stage 2 only | 0.2322* |
+| Stage 2 only | 0.2328 |
 | **Full PRISM – patch preserving** | **0.2076** |
 
 `*` The Stage-2-only score is a previously documented project result. Its original checkpoint was not available in the current checkpoint directory when the bridge experiments were reproduced.
