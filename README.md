@@ -51,9 +51,16 @@ PRISM_DLAMBonus/
 
 Create and activate a virtual environment:
 
+### Linux / macOS:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+```
+
+### Windows (Powershell):
+```bash
+python -m venv .venv
+.venv\Scripts\activate 
 ```
 
 Install the project dependencies:
@@ -193,7 +200,7 @@ Unless otherwise stated, experiments use:
 ## Course-Dataset Experiments
 
 ### Full PRISM with mean pooling
-
+#### Linux / macOS:
 ```bash
 python train.py \
   --model prism \
@@ -204,8 +211,20 @@ python train.py \
   --batch-size 128
 ```
 
+#### Windows (PowerShell):
+```bash
+  python train.py `
+    --model prism `
+    --mode full `
+    --pooling mean `
+    --epochs 30 `
+    --stride 6 `
+    --batch-size 128
+  ```
+
 ### Full PRISM with attention pooling
 
+#### Linux / macOS:
 ```bash
 python train.py \
   --model prism \
@@ -215,9 +234,20 @@ python train.py \
   --stride 6 \
   --batch-size 128
 ```
+#### Windows (PowerShell):
+```bash
+python train.py `
+    --model prism `
+    --mode full `
+    --pooling attention `
+    --epochs 30 `
+    --stride 6 `
+    --batch-size 128
+  ```
 
 ### Full PRISM with patch-preserving bridge
 
+#### Linux / macOS:
 ```bash
 python train.py \
   --model prism \
@@ -228,8 +258,20 @@ python train.py \
   --batch-size 128
 ```
 
+#### Windows (PowerShell):
+```bash
+python train.py `
+    --model prism `
+    --mode full `
+    --pooling patches `
+    --epochs 30 `
+    --stride 6 `
+    --batch-size 128
+  ```
+
 ### Stage 1 only
 
+#### Linux / macOS:
 ```bash
 python train.py \
   --model prism \
@@ -239,8 +281,19 @@ python train.py \
   --batch-size 128
 ```
 
+#### Windows (PowerShell):
+```bash
+python train.py `
+    --model prism `
+    --mode stage1 `
+    --epochs 30 `
+    --stride 6 `
+    --batch-size 128
+  ```
+
 ### Stage 2 only
 
+#### Linux / macOS:
 ```bash
 python train.py \
   --model prism \
@@ -249,6 +302,15 @@ python train.py \
   --stride 6 \
   --batch-size 128
 ```
+#### Windows (PowerShell):
+```bash
+python train.py `
+    --model prism `
+    --mode stage2 `
+    --epochs 30 `
+    --stride 6 `
+    --batch-size 128
+  ```
 
 ---
 
@@ -263,7 +325,7 @@ python scripts/prep_dataset2.py
 Use `data/etth1/prepared` as the data directory. Separate checkpoint directories are used below to avoid overwriting models from other experiments.
 
 ### Mean pooling
-
+#### Linux / macOS:
 ```bash
 python train.py \
   --data-dir data/etth1/prepared \
@@ -275,9 +337,21 @@ python train.py \
   --stride 6 \
   --batch-size 128
 ```
-
+#### Windows (PowerShell):
+```bash
+python train.py `
+    --data-dir data/etth1/prepared `
+    --output-dir checkpoints/etth1_mean `
+    --model prism `
+    --mode full `
+    --pooling mean `
+    --epochs 30 `
+    --stride 6 `
+    --batch-size 128
+  ```
 ### Attention pooling
 
+#### Linux / macOS:
 ```bash
 python train.py \
   --data-dir data/etth1/prepared \
@@ -289,9 +363,22 @@ python train.py \
   --stride 6 \
   --batch-size 128
 ```
+#### Windows (PowerShell):
+```bash
+python train.py `
+    --data-dir data/etth1/prepared `
+    --output-dir checkpoints/etth1_attention `
+    --model prism `
+    --mode full `
+    --pooling attention `
+    --epochs 30 `
+    --stride 6 `
+    --batch-size 128
+  ```
 
 ### Patch-preserving bridge
 
+#### Linux / macOS:
 ```bash
 python train.py \
   --data-dir data/etth1/prepared \
@@ -304,8 +391,21 @@ python train.py \
   --batch-size 128
 ```
 
+#### Windows (PowerShell):
+```bash
+python train.py `
+    --data-dir data/etth1/prepared `
+    --output-dir checkpoints/etth1_patches `
+    --model prism `
+    --mode full `
+    --pooling patches `
+    --epochs 30 `
+    --stride 6 `
+    --batch-size 128
+  ```
 ### Stage 1 only
 
+#### Linux / macOS:
 ```bash
 python train.py \
   --data-dir data/etth1/prepared \
@@ -317,8 +417,20 @@ python train.py \
   --batch-size 128
 ```
 
+#### Windows (PowerShell):
+```bash
+python train.py `
+    --data-dir data/etth1/prepared `
+    --output-dir checkpoints/etth1_stage1 `
+    --model prism `
+    --mode stage1 `
+    --epochs 30 `
+    --stride 6 `
+    --batch-size 128
+  ```
 ### Stage 2 only
 
+#### Linux / macOS:
 ```bash
 python train.py \
   --data-dir data/etth1/prepared \
@@ -330,6 +442,17 @@ python train.py \
   --batch-size 128
 ```
 
+#### Windows (PowerShell):
+```bash
+python train.py `
+    --data-dir data/etth1/prepared `
+    --output-dir checkpoints/etth1_stage2 `
+    --model prism `
+    --mode stage2 `
+    --epochs 30 `
+    --stride 6 `
+    --batch-size 128
+  ```
 ---
 
 ## Evaluation
@@ -338,12 +461,21 @@ The local holdout is the final 336 labelled hours excluded from training.
 
 Evaluate a course-dataset checkpoint with:
 
+### Linux / macOS:
 ```bash
 python eval_holdout.py \
   --checkpoint checkpoints/prism_full_patches.pt \
   --scaler checkpoints/scaler.npz \
   --device mps
 ```
+
+### Windows (PowerShell):
+```bash
+python eval_holdout.py `
+    --checkpoint checkpoints/prism_full_patches.pt `
+    --scaler checkpoints/scaler.npz `
+    --device cpu
+  ```
 
 The evaluation reports:
 
