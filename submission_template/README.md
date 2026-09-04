@@ -38,7 +38,7 @@ The model name is entered in the leaderboard Space when uploading validation pre
 From inside this directory, create the archive with:
 
 ```bash
-zip -r final_submission.zip predict.py requirements.txt checkpoint.pt scaler.npz 
+zip -r final_submission.zip predict.py requirements.txt checkpoint.pt scaler.npz src
 ```
 
 Do not include training data, private data, virtual environments, caches, or large unused artifacts.
