@@ -2,8 +2,6 @@
 
 Use this folder as the starting point for `final_submission.zip`.
 
-For simple runnable baseline forecasts, see `student/baseline/`.
-
 ## Required Files
 
 - `predict.py`: inference entrypoint.

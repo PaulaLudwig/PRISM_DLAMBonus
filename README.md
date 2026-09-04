@@ -28,7 +28,7 @@ PRISM_DLAMBonus/
 │           └── validation_input.csv
 ├── scripts/
 │   ├── download_data.py
-│   └── pre_dataset2.py
+│   └── prep_dataset2.py
 ├── src/
 │   ├── data.py
 │   ├── metrics.py
@@ -198,6 +198,24 @@ Unless otherwise stated, experiments use:
 ---
 
 ## Course-Dataset Experiments
+
+### LSTM baseline
+#### Linux / macOS:
+```bash
+python train.py \
+  --model lstm \
+  --epochs 30 \
+  --stride 6 \
+  --batch-size 128
+```
+#### Windows (PowerShell):
+```bash
+python train.py `
+    --model lstm `
+    --epochs 30 `
+    --stride 6 `
+    --batch-size 128
+  ```
 
 ### Full PRISM with mean pooling
 #### Linux / macOS:
@@ -496,12 +514,12 @@ Lower values are better for all metrics. **WAPE is the primary model-selection m
 
 | Model / bridge | WAPE ↓ |
 |---|---:|
+| LSTM baseline | 0.2598 |
+| Stage 1 only | 0.2464 |
 | Full PRISM – mean pooling | 0.2429 |
 | Full PRISM – attention pooling | 0.2436 |
 | Stage 2 only | 0.2328 |
 | **Full PRISM – patch preserving** | **0.2076** |
-
-`*` The Stage-2-only score is a previously documented project result. Its original checkpoint was not available in the current checkpoint directory when the bridge experiments were reproduced.
 
 The independently re-evaluated patch-preserving checkpoint gives:
 
